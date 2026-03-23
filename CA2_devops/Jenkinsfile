@@ -2,104 +2,454 @@ pipeline {
     agent any
 
     environment {
-        // Python virtual environment directory
+        // Python environment
         VENV_DIR = 'venv'
-        // HTML test report output
-        REPORT_DIR = 'reports'
+        PYTHON_REPORT_DIR = 'reports/python'
+
+        // Java/Maven environment
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-11'
+        MAVEN_HOME = 'C:\\apache-maven-3.9.5'
+        MAVEN_OPTS = '-Xmx1024m'
+
+        // Test results
+        JAVA_REPORT_DIR = 'reports/java'
+        COMBINED_REPORT_DIR = 'reports/combined'
+
+        // Build info
+        BUILD_TIMESTAMP = "${currentBuild.startTimeInMillis}"
+    }
+
+    tools {
+        maven 'Maven 3.9.5'
+        jdk 'JDK 11'
     }
 
     stages {
 
-        // ── Stage 1: Checkout ──────────────────────────────────
-        stage('Checkout') {
+        // ── Stage 1: Checkout & Setup ──────────────────────────
+        stage('Checkout & Setup') {
             steps {
-                echo '===== Checking out source code ====='
+                echo '🔄 ===== Checking out source code ====='
                 checkout scm
+
+                echo '📁 ===== Creating report directories ====='
+                script {
+                    if (isUnix()) {
+                        sh """
+                            mkdir -p ${PYTHON_REPORT_DIR}
+                            mkdir -p ${JAVA_REPORT_DIR}
+                            mkdir -p ${COMBINED_REPORT_DIR}
+                        """
+                    } else {
+                        bat """
+                            if not exist ${PYTHON_REPORT_DIR} mkdir ${PYTHON_REPORT_DIR}
+                            if not exist ${JAVA_REPORT_DIR} mkdir ${JAVA_REPORT_DIR}
+                            if not exist ${COMBINED_REPORT_DIR} mkdir ${COMBINED_REPORT_DIR}
+                        """
+                    }
+                }
             }
         }
 
-        // ── Stage 2: Setup Python Environment ─────────────────
-        stage('Setup Environment') {
+        // ── Stage 2: Code Quality Check ───────────────────────
+        stage('Code Quality Check') {
             steps {
-                echo '===== Setting up Python virtual environment ====='
+                echo '🔍 ===== Running Code Quality Checks ====='
+
+                // Check for sensitive data in code
+                script {
+                    def sensitiveFiles = findFiles(glob: '**/*.{js,html,py,java}')
+                    for (file in sensitiveFiles) {
+                        def content = readFile(file.path)
+                        if (content.contains('AIzaSy') && content.contains('firebase')) {
+                            echo "⚠️  WARNING: Found Firebase API key in ${file.path}"
+                        }
+                    }
+                }
+
+                // Basic file structure validation
+                script {
+                    def requiredFiles = ['index.html', 'style.css', 'validation.js', 'firebase-config.js']
+                    for (file in requiredFiles) {
+                        if (!fileExists(file)) {
+                            error "❌ Required file missing: ${file}"
+                        }
+                    }
+                    echo '✅ All required frontend files present'
+                }
+            }
+        }
+
+        // ── Stage 3: Setup Python Environment ─────────────────
+        stage('Setup Python Environment') {
+            steps {
+                echo '🐍 ===== Setting up Python virtual environment ====='
                 script {
                     if (isUnix()) {
-                        sh '''
+                        sh """
                             python3 -m venv ${VENV_DIR}
                             . ${VENV_DIR}/bin/activate
                             pip install --upgrade pip
                             pip install -r requirements.txt
-                        '''
+                            pip install pytest-cov  # For coverage reports
+                        """
                     } else {
                         bat """
                             python -m venv %VENV_DIR%
                             call %VENV_DIR%\\Scripts\\activate.bat
                             pip install --upgrade pip
                             pip install -r requirements.txt
+                            pip install pytest-cov
                         """
                     }
                 }
             }
         }
 
-        // ── Stage 3: Run Selenium Tests ────────────────────────
-        stage('Run Selenium Tests') {
+        // ── Stage 4: Java Build & Compile ────────────────────
+        stage('Java Build & Compile') {
             steps {
-                echo '===== Running Selenium Test Suite ====='
+                echo '☕ ===== Building Java Selenium Tests ====='
+
                 script {
-                    // Create report directory
                     if (isUnix()) {
-                        sh "mkdir -p ${REPORT_DIR}"
+                        sh """
+                            mvn clean compile -f pom.xml
+                        """
+                    } else {
+                        bat """
+                            mvn clean compile -f pom.xml
+                        """
+                    }
+                }
+
+                echo '✅ Java compilation successful'
+            }
+        }
+
+        // ── Stage 5: Run Java Selenium Tests ─────────────────
+        stage('Run Java Selenium Tests') {
+            steps {
+                echo '🚀 ===== Running Java Selenium Test Suite ====='
+
+                script {
+                    if (isUnix()) {
+                        sh """
+                            mvn test -f pom.xml \\
+                                -Dsurefire.reports.directory=${JAVA_REPORT_DIR} \\
+                                -Dtestng.outputdir=${JAVA_REPORT_DIR}
+                        """
+                    } else {
+                        bat """
+                            mvn test -f pom.xml ^
+                                -Dsurefire.reports.directory=%JAVA_REPORT_DIR% ^
+                                -Dtestng.outputdir=%JAVA_REPORT_DIR%
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── Stage 6: Run Python Selenium Tests ──────────────
+        stage('Run Python Selenium Tests') {
+            steps {
+                echo '🐍 ===== Running Python Selenium Test Suite ====='
+
+                script {
+                    if (isUnix()) {
                         sh """
                             . ${VENV_DIR}/bin/activate
                             python -m pytest test_feedback_form.py \\
                                 --tb=short \\
                                 -v \\
-                                --html=${REPORT_DIR}/test_report.html \\
+                                --html=${PYTHON_REPORT_DIR}/test_report.html \\
                                 --self-contained-html \\
-                                --junitxml=${REPORT_DIR}/test_results.xml
+                                --junitxml=${PYTHON_REPORT_DIR}/test_results.xml \\
+                                --cov=. \\
+                                --cov-report=html:${PYTHON_REPORT_DIR}/coverage.html \\
+                                --cov-report=xml:${PYTHON_REPORT_DIR}/coverage.xml
                         """
                     } else {
-                        bat "if not exist %REPORT_DIR% mkdir %REPORT_DIR%"
                         bat """
                             call %VENV_DIR%\\Scripts\\activate.bat && ^
                             python -m pytest test_feedback_form.py ^
                                 --tb=short ^
                                 -v ^
-                                --html=%REPORT_DIR%\\test_report.html ^
+                                --html=%PYTHON_REPORT_DIR%\\test_report.html ^
                                 --self-contained-html ^
-                                --junitxml=%REPORT_DIR%\\test_results.xml
+                                --junitxml=%PYTHON_REPORT_DIR%\\test_results.xml ^
+                                --cov=. ^
+                                --cov-report=html:%PYTHON_REPORT_DIR%\\coverage.html ^
+                                --cov-report=xml:%PYTHON_REPORT_DIR%\\coverage.xml
                         """
                     }
                 }
             }
         }
 
-        // ── Stage 4: Archive & Publish Results ────────────────
-        stage('Archive Results') {
+        // ── Stage 7: Cross-Browser Testing (Optional) ────────
+        stage('Cross-Browser Testing') {
+            when {
+                expression { return params.RUN_CROSS_BROWSER }
+            }
             steps {
-                echo '===== Publishing Test Reports ====='
+                echo '🌐 ===== Running Cross-Browser Tests ====='
 
-                // Publish JUnit XML results (shown in Jenkins build dashboard)
-                junit "${REPORT_DIR}/test_results.xml"
+                script {
+                    if (isUnix()) {
+                        sh """
+                            . ${VENV_DIR}/bin/activate
+                            python -m pytest test_feedback_form.py \\
+                                --tb=short \\
+                                -v \\
+                                --browser chrome \\
+                                --browser firefox \\
+                                --html=${PYTHON_REPORT_DIR}/cross_browser_report.html
+                        """
+                    } else {
+                        bat """
+                            call %VENV_DIR%\\Scripts\\activate.bat && ^
+                            python -m pytest test_feedback_form.py ^
+                                --tb=short ^
+                                -v ^
+                                --browser chrome ^
+                                --browser firefox ^
+                                --html=%PYTHON_REPORT_DIR%\\cross_browser_report.html
+                        """
+                    }
+                }
+            }
+        }
 
-                // Archive the HTML report as a build artifact
-                archiveArtifacts artifacts: "${REPORT_DIR}/**/*", fingerprint: true
+        // ── Stage 8: Performance Testing ─────────────────────
+        stage('Performance Testing') {
+            when {
+                expression { return params.RUN_PERFORMANCE }
+            }
+            steps {
+                echo '⚡ ===== Running Performance Tests ====='
+
+                script {
+                    if (isUnix()) {
+                        sh """
+                            . ${VENV_DIR}/bin/activate
+                            python -c "
+                            import time
+                            from selenium import webdriver
+                            from selenium.webdriver.chrome.options import Options
+
+                            options = Options()
+                            options.add_argument('--headless')
+                            driver = webdriver.Chrome(options=options)
+
+                            start_time = time.time()
+                            driver.get('file://${WORKSPACE}/index.html')
+                            load_time = time.time() - start_time
+
+                            print(f'Page load time: {load_time:.2f} seconds')
+                            driver.quit()
+                            "
+                        """
+                    } else {
+                        bat """
+                            call %VENV_DIR%\\Scripts\\activate.bat && ^
+                            python -c ^
+                            \" ^
+                            import time ^
+                            from selenium import webdriver ^
+                            from selenium.webdriver.chrome.options import Options ^
+                            ^
+                            options = Options() ^
+                            options.add_argument('--headless') ^
+                            driver = webdriver.Chrome(options=options) ^
+                            ^
+                            start_time = time.time() ^
+                            driver.get('file://%WORKSPACE%/index.html') ^
+                            load_time = time.time() - start_time ^
+                            ^
+                            print(f'Page load time: {load_time:.2f} seconds') ^
+                            driver.quit() ^
+                            \"
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── Stage 9: Generate Combined Reports ──────────────
+        stage('Generate Combined Reports') {
+            steps {
+                echo '📊 ===== Generating Combined Test Reports ====='
+
+                script {
+                    // Create a summary report
+                    def summaryContent = """
+                    # Test Execution Summary
+                    Build: ${env.BUILD_NUMBER}
+                    Date: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
+                    Duration: ${currentBuild.durationString}
+
+                    ## Test Results
+                    - Java Tests: ${junitTestResult?.passCount ?: 0} passed, ${junitTestResult?.failCount ?: 0} failed
+                    - Python Tests: Check individual reports
+
+                    ## Build Status: ${currentBuild.currentResult}
+                    """
+
+                    writeFile file: "${COMBINED_REPORT_DIR}/summary.md", text: summaryContent
+                }
+            }
+        }
+
+        // ── Stage 10: Deploy (Optional) ──────────────────────
+        stage('Deploy to Staging') {
+            when {
+                expression { return params.DEPLOY_TO_STAGING && currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo '🚀 ===== Deploying to Staging Environment ====='
+
+                script {
+                    // Example deployment steps
+                    echo 'Copying files to staging server...'
+                    // Add your deployment commands here
+                    // sh 'scp -r . user@staging-server:/var/www/html/'
+                    // sh 'ssh user@staging-server "sudo systemctl restart nginx"'
+                }
             }
         }
     }
 
-    // ── Post Build Actions ─────────────────────────────────────
+    // ── Post Build Actions ───────────────────────────────────
     post {
-        success {
-            echo '✅ All Selenium tests passed! Build SUCCESSFUL.'
-        }
-        failure {
-            echo '❌ One or more Selenium tests failed. Check the test report.'
-        }
         always {
-            echo '===== Pipeline finished. Cleaning workspace... ====='
-            cleanWs()
+            echo '🧹 ===== Publishing Test Reports ====='
+
+            // Publish JUnit results from both Java and Python tests
+            junit allowEmptyResults: true, testResults: '**/*test_results.xml'
+
+            // Archive all reports
+            archiveArtifacts artifacts: 'reports/**/*', fingerprint: true, allowEmptyArchive: true
+
+            // Publish HTML reports
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: "${PYTHON_REPORT_DIR}",
+                reportFiles: 'test_report.html',
+                reportName: 'Python Selenium Tests'
+            ])
+
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: "${PYTHON_REPORT_DIR}",
+                reportFiles: 'coverage.html',
+                reportName: 'Python Code Coverage'
+            ])
+
+            echo '📧 ===== Sending Notifications ====='
+            // Add email notifications here if needed
         }
+
+        success {
+            echo '✅ ===== BUILD SUCCESSFUL ====='
+            echo '🎉 All tests passed! Ready for deployment.'
+
+            script {
+                // Send success notification
+                emailext(
+                    subject: "✅ Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                    Build successful!
+
+                    Job: ${env.JOB_NAME}
+                    Build: #${env.BUILD_NUMBER}
+                    Duration: ${currentBuild.durationString}
+
+                    View results: ${env.BUILD_URL}
+                    """,
+                    to: 'team@example.com',
+                    attachLog: false
+                )
+            }
+        }
+
+        failure {
+            echo '❌ ===== BUILD FAILED ====='
+            echo '🔍 Check the test reports for details.'
+
+            script {
+                // Send failure notification
+                emailext(
+                    subject: "❌ Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                    Build failed!
+
+                    Job: ${env.JOB_NAME}
+                    Build: #${env.BUILD_NUMBER}
+                    Duration: ${currentBuild.durationString}
+
+                    View results: ${env.BUILD_URL}
+                    """,
+                    to: 'team@example.com',
+                    attachLog: true
+                )
+            }
+        }
+
+        unstable {
+            echo '⚠️  ===== BUILD UNSTABLE ====='
+            echo 'Some tests may have failed. Check reports.'
+        }
+
+        cleanup {
+            echo '🧹 ===== Cleaning up workspace ====='
+            cleanWs(
+                cleanWhenAborted: true,
+                cleanWhenFailure: true,
+                cleanWhenNotBuilt: true,
+                cleanWhenSuccess: true,
+                cleanWhenUnstable: true
+            )
+        }
+    }
+
+    // ── Pipeline Parameters ──────────────────────────────────
+    parameters {
+        booleanParam(
+            name: 'RUN_CROSS_BROWSER',
+            defaultValue: false,
+            description: 'Run tests on multiple browsers (Chrome + Firefox)'
+        )
+        booleanParam(
+            name: 'RUN_PERFORMANCE',
+            defaultValue: false,
+            description: 'Run performance/load time tests'
+        )
+        booleanParam(
+            name: 'DEPLOY_TO_STAGING',
+            defaultValue: false,
+            description: 'Deploy to staging environment after successful build'
+        )
+    }
+
+    // ── Pipeline Options ─────────────────────────────────────
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    // ── Triggers ─────────────────────────────────────────────
+    triggers {
+        // Run daily at 2 AM
+        cron('H 2 * * *')
+
+        // Poll SCM every 15 minutes
+        pollSCM('H/15 * * * *')
     }
 }
