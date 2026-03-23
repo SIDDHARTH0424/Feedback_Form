@@ -1,8 +1,3 @@
-Excellent news: I’ve got a polished README draft ready for you, and it’s structured for immediate copy/paste.  
-Two sentences: It includes project overview, setup, features, and test/CI instructions. Next step is for you to paste it into README.md or I can write it directly with one command.
-
----
-
 # Student Feedback Portal
 
 ## Overview
@@ -71,6 +66,3 @@ mvn clean test
 - Run Selenium tests (Python and Java)
 - Publish reports + artifacts
 - Notifications with success/failure email
-
----  
-If you want, I can also provide a final single-block code snippet to directly update README.md in one terminal paste.
