@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — Student Feedback Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:      #6c63ff;
+      --primary-dark: #4e45d1;
+      --accent:       #f093fb;
+      --text:         #2d3748;
+      --muted:        #718096;
+      --light:        #f7f8fc;
+      --white:        #ffffff;
+      --card-shadow:  0 8px 32px rgba(108,99,255,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+    }
+
+    /* ════════════════════════════════════════
+       NAVBAR
+    ════════════════════════════════════════ */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e8e8f0;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 66px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-links a:hover { background: #f0eeff; color: var(--primary); }
+
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-nav-outline {
+      padding: 8px 18px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--primary);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-outline:hover { background: var(--primary); color: #fff; }
+
+    #userEmailBadge {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ════════════════════════════════════════
+       HERO SECTION
+    ════════════════════════════════════════ */
+    #hero {
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(255,255,255,0.06) 0%, transparent 60%);
+    }
+
+    .hero-content { position: relative; max-width: 700px; }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 30px;
+      margin-bottom: 24px;
+    }
+
+    #hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+
+    #hero h1 span {
+      background: linear-gradient(90deg, #f093fb, #f5a623);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #hero p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.82);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+      padding: 15px 32px;
+      background: #fff;
+      color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+
+    .btn-hero-outline {
+      padding: 15px 32px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.6);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-hero-outline:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
+
+    /* ════════════════════════════════════════
+       STATS STRIP
+    ════════════════════════════════════════ */
+    #stats {
+      background: var(--primary);
+      padding: 36px 40px;
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-item .num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .stat-item .lbl {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.75);
+      margin-top: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    /* ════════════════════════════════════════
+       ABOUT SECTION
+    ════════════════════════════════════════ */
+    #about {
+      padding: 90px 40px;
+      background: var(--light);
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .about-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 30px 28px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .about-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(108,99,255,0.18); }
+
+    .about-card .icon {
+      font-size: 2rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .about-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .about-card p  { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+    /* ════════════════════════════════════════
+       FEATURES SECTION
+    ════════════════════════════════════════ */
+    #features {
+      padding: 90px 40px;
+      background: var(--white);
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--light);
+      border-radius: 14px;
+      padding: 34px 24px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.25s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      background: #f0eeff;
+      transform: translateY(-3px);
+    }
+
+    .feature-card .f-icon {
+      font-size: 2.4rem;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 { font-size: 0.97rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p  { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+    /* ════════════════════════════════════════
+       HOW IT WORKS
+    ════════════════════════════════════════ */
+    #how {
+      padding: 90px 40px;
+      background: linear-gradient(135deg, #f0eeff 0%, #fce4ff 100%);
+      text-align: center;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step {
+      flex: 1;
+      min-width: 180px;
+      max-width: 240px;
+      padding: 28px 20px;
+      position: relative;
+    }
+
+    .step-num {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #764ba2);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 6px 18px rgba(108,99,255,0.35);
+    }
+
+    .step h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .step p  { font-size: 0.83rem; color: var(--muted); }
+
+    /* ════════════════════════════════════════
+       CTA SECTION
+    ════════════════════════════════════════ */
+    #cta {
+      padding: 90px 40px;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #cta h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; color: #fff; margin-bottom: 16px; }
+    #cta p  { font-size: 1rem; color: rgba(255,255,255,0.8); max-width: 480px; margin: 0 auto 36px; line-height: 1.7; }
+
+    .btn-cta {
+      padding: 16px 44px;
+      background: #fff;
+      color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,0.25); }
+
+    /* ════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════ */
+    footer {
+      background: #1a1a2e;
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      padding: 28px 40px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+
+    footer strong { color: rgba(255,255,255,0.85); }
+
+    /* ════════════════════════════════════════
+       UTILITIES
+    ════════════════════════════════════════ */
+    .section-center { text-align: center; max-width: 1100px; margin: 0 auto; }
+    .mb-0{ margin-bottom: 0 !important; }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 18px; }
+      #stats { gap: 30px; }
+      #about, #features, #how, #cta { padding: 60px 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav>
+    <a href="#hero" class="nav-brand">🎓 Feedback Portal</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="index.html">Feedback Form</a></li>
+    </ul>
+    <div class="nav-actions">
+      <span id="userEmailBadge"></span>
+      <button class="btn-nav-outline" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       SECTION 1 — HERO
+  ══════════════════════════════════════ -->
+  <section id="hero">
+    <div class="hero-content">
+      <span class="hero-badge">🎓 Symbiosis Institute — Student Portal</span>
+      <h1>Share Your <span>Feedback.</span><br/>Shape Your Future.</h1>
+      <p>
+        Help us improve your learning experience. Your honest feedback drives better teaching,
+        better facilities, and a better campus for everyone.
+      </p>
+      <div class="hero-buttons">
+        <a href="index.html" class="btn-hero-primary">📋 Submit Feedback</a>
+        <a href="#about"     class="btn-hero-outline">Learn More ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       STATS STRIP
+  ══════════════════════════════════════ -->
+  <div id="stats">
+    <div class="stat-item"><div class="num">5,000+</div><div class="lbl">Students Enrolled</div></div>
+    <div class="stat-item"><div class="num">120+</div><div class="lbl">Faculty Members</div></div>
+    <div class="stat-item"><div class="num">18+</div><div class="lbl">Departments</div></div>
+    <div class="stat-item"><div class="num">98%</div><div class="lbl">Satisfaction Rate</div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECTION 2 — ABOUT
+  ══════════════════════════════════════ -->
+  <section id="about">
+    <div class="section-center">
+      <p class="section-label">About the Portal</p>
+      <h2 class="section-title">Why Student Feedback Matters</h2>
+      <p class="section-sub">
+        This portal is designed to give every student a secure and easy way to voice their
+        opinions, helping the institution continuously improve.
+      </p>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <span class="icon">🔒</span>
+          <h3>Secure & Private</h3>
+          <p>All submissions are encrypted and stored securely via Firebase. Only authorised staff can view responses.</p>
+        </div>
+        <div class="about-card">
+          <span class="icon">⚡</span>
+          <h3>Real-Time Storage</h3>
+          <p>Feedback is saved instantly to the cloud—no waiting, no data loss, accessible from anywhere.</p>
+        </div>
+        <div class="about-card">
+          <span class="icon">✅</span>
+          <h3>Smart Validation</h3>
+          <p>Built-in form validation ensures submissions are complete and meaningful before they are stored.</p>
+        </div>
+        <div class="about-card">
+          <span class="icon">📊</span>
+          <h3>Data-Driven Decisions</h3>
+          <p>Collected feedback is used by department heads to make informed improvements to curriculum and services.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 3 — FEATURES
+  ══════════════════════════════════════ -->
+  <section id="features">
+    <div class="section-center">
+      <p class="section-label">Platform Features</p>
+      <h2 class="section-title">Everything You Need in One Place</h2>
+      <p class="section-sub mb-0">
+        A modern, responsive platform built with the latest web technologies.
+      </p>
+    </div>
+
+    <div class="features-grid" style="margin-top:48px">
+      <div class="feature-card">
+        <span class="f-icon">📋</span>
+        <h3>Structured Form</h3>
+        <p>Fields for name, email, mobile, department, gender, and detailed comments — nothing is missed.</p>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">🌐</span>
+        <h3>Cloud Connected</h3>
+        <p>Firebase Firestore backend ensures responses are stored reliably and retrieved instantly.</p>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">📱</span>
+        <h3>Mobile Friendly</h3>
+        <p>Fully responsive design works perfectly on phones, tablets, and desktops.</p>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">🤖</span>
+        <h3>Automated Testing</h3>
+        <p>Selenium-powered test suite and Jenkins CI pipeline ensure quality with every change.</p>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">🎨</span>
+        <h3>Modern Design</h3>
+        <p>Clean, professional UI with gradient accents and micro-animations for a premium experience.</p>
+      </div>
+      <div class="feature-card">
+        <span class="f-icon">🔐</span>
+        <h3>Authenticated Access</h3>
+        <p>Firebase Authentication ensures only registered students can submit feedback.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 4 — HOW IT WORKS
+  ══════════════════════════════════════ -->
+  <section id="how">
+    <div class="section-center">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">Submit Feedback in 3 Easy Steps</h2>
+      <p class="section-sub">
+        The process is simple, fast, and completely secure.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Create Account</h3>
+        <p>Sign up with your student email to get secure access to the portal.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Fill the Form</h3>
+        <p>Complete all the fields in the feedback form accurately and honestly.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Submit & Done!</h3>
+        <p>Your feedback is validated and saved to the cloud database instantly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 5 — CTA
+  ══════════════════════════════════════ -->
+  <section id="cta">
+    <h2>Ready to Make a Difference?</h2>
+    <p>
+      Your voice matters. Take 2 minutes to fill in the feedback form and help us build
+      a better learning environment for everyone.
+    </p>
+    <a href="index.html" class="btn-cta">📋 Submit Your Feedback Now</a>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer>
+    <p><strong>🎓 Student Feedback Portal</strong> — Symbiosis Institute of Technology</p>
+    <p style="margin-top:6px">Built with HTML · CSS · JavaScript · Firebase · Selenium · Jenkins &nbsp;|&nbsp; © 2026</p>
+  </footer>
+
+  <script type="module">
+    import { requireAuth, logoutUser, getCurrentUser } from "./auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { auth } from "./firebase-config.js";
+
+    // Guard — redirect to login if not authenticated
+    requireAuth("login.html");
+
+    // Show user email in navbar once loaded
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('userEmailBadge').textContent = '👤 ' + user.email;
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await logoutUser();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

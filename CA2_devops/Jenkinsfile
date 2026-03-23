@@ -1,0 +1,105 @@
+pipeline {
+    agent any
+
+    environment {
+        // Python virtual environment directory
+        VENV_DIR = 'venv'
+        // HTML test report output
+        REPORT_DIR = 'reports'
+    }
+
+    stages {
+
+        // ── Stage 1: Checkout ──────────────────────────────────
+        stage('Checkout') {
+            steps {
+                echo '===== Checking out source code ====='
+                checkout scm
+            }
+        }
+
+        // ── Stage 2: Setup Python Environment ─────────────────
+        stage('Setup Environment') {
+            steps {
+                echo '===== Setting up Python virtual environment ====='
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            python3 -m venv ${VENV_DIR}
+                            . ${VENV_DIR}/bin/activate
+                            pip install --upgrade pip
+                            pip install -r requirements.txt
+                        '''
+                    } else {
+                        bat """
+                            python -m venv %VENV_DIR%
+                            call %VENV_DIR%\\Scripts\\activate.bat
+                            pip install --upgrade pip
+                            pip install -r requirements.txt
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── Stage 3: Run Selenium Tests ────────────────────────
+        stage('Run Selenium Tests') {
+            steps {
+                echo '===== Running Selenium Test Suite ====='
+                script {
+                    // Create report directory
+                    if (isUnix()) {
+                        sh "mkdir -p ${REPORT_DIR}"
+                        sh """
+                            . ${VENV_DIR}/bin/activate
+                            python -m pytest test_feedback_form.py \\
+                                --tb=short \\
+                                -v \\
+                                --html=${REPORT_DIR}/test_report.html \\
+                                --self-contained-html \\
+                                --junitxml=${REPORT_DIR}/test_results.xml
+                        """
+                    } else {
+                        bat "if not exist %REPORT_DIR% mkdir %REPORT_DIR%"
+                        bat """
+                            call %VENV_DIR%\\Scripts\\activate.bat && ^
+                            python -m pytest test_feedback_form.py ^
+                                --tb=short ^
+                                -v ^
+                                --html=%REPORT_DIR%\\test_report.html ^
+                                --self-contained-html ^
+                                --junitxml=%REPORT_DIR%\\test_results.xml
+                        """
+                    }
+                }
+            }
+        }
+
+        // ── Stage 4: Archive & Publish Results ────────────────
+        stage('Archive Results') {
+            steps {
+                echo '===== Publishing Test Reports ====='
+
+                // Publish JUnit XML results (shown in Jenkins build dashboard)
+                junit "${REPORT_DIR}/test_results.xml"
+
+                // Archive the HTML report as a build artifact
+                archiveArtifacts artifacts: "${REPORT_DIR}/**/*", fingerprint: true
+            }
+        }
+    }
+
+    // ── Post Build Actions ─────────────────────────────────────
+    post {
+        success {
+            echo '✅ All Selenium tests passed! Build SUCCESSFUL.'
+        }
+        failure {
+            echo '❌ One or more Selenium tests failed. Check the test report.'
+        }
+        always {
+            echo '===== Pipeline finished. Cleaning workspace... ====='
+            cleanWs()
+        }
+    }
+}

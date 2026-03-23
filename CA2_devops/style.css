@@ -1,0 +1,282 @@
+/* ================================================================
+   EXTERNAL CSS — Student Feedback Registration Form
+   style.css
+   ================================================================ */
+
+/* ── Google Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── CSS Variables (Design Tokens) ── */
+:root {
+  --primary:      #6c63ff;
+  --primary-dark: #4e45d1;
+  --secondary:    #f0eeff;
+  --danger:       #e53e3e;
+  --danger-bg:    #fff5f5;
+  --success:      #38a169;
+  --success-bg:   #f0fff4;
+  --text-main:    #2d3748;
+  --text-muted:   #718096;
+  --border:       #e2e8f0;
+  --border-focus: #6c63ff;
+  --bg-page:      linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --card-bg:      #ffffff;
+  --radius:       12px;
+  --shadow:       0 20px 60px rgba(0, 0, 0, 0.15);
+  --transition:   0.25s ease;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Background ── */
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-page);
+  min-height: 100vh;
+  color: var(--text-main);
+  padding: 20px 0 60px;
+}
+
+/* ── Form Card ── */
+.form-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: slideUp 0.5s ease both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Form Title ── */
+.form-title h1 {
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.form-title p {
+  color: var(--text-muted);
+}
+
+/* ── Labels ── */
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 7px;
+  cursor: pointer;
+}
+
+.required {
+  color: var(--danger);
+  margin-left: 2px;
+}
+
+/* ── Text Inputs, Select, Textarea ── */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 15px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.93rem;
+  color: var(--text-main);
+  background: #fafafa;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  outline: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+
+/* ── Field Error State ── */
+input.invalid,
+select.invalid,
+textarea.invalid {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.12);
+}
+
+/* ── Error Messages ── */
+.error-msg {
+  display: block;
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 5px;
+  min-height: 16px;
+  transition: opacity var(--transition);
+}
+
+/* ── Word Count ── */
+.word-count {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Radio Group ── */
+.radio-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 6px 0;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 6px 14px;
+  border: 2px solid var(--border);
+  border-radius: 30px;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.radio-label:hover {
+  border-color: var(--primary);
+  background: var(--secondary);
+}
+
+.radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"]:checked + span {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.radio-label:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--secondary);
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #3a31a8 100%);
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-reset {
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.btn-reset:hover {
+  background: #d1d5db;
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+/* ── Toast Notification ── */
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  z-index: 9999;
+  max-width: 320px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.success {
+  background: var(--success);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .form-card {
+    padding: 28px 22px;
+  }
+
+  .btn-row {
+    flex-direction: column;
+  }
+
+  .radio-group {
+    gap: 10px;
+  }
+}

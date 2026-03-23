@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Feedback Registration Form</title>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Internal CSS -->
+  <style>
+    /* ── Internal CSS: form container sizing and field spacing ── */
+    .form-card {
+      max-width: 620px;
+      width: 94%;
+      margin: 48px auto;
+      padding: 40px 44px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .form-title {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-title h1 {
+      font-size: 1.75rem;
+      margin-bottom: 4px;
+    }
+
+    .form-title p {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .btn-row button {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Toast notification -->
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+  <main class="form-card" role="main">
+    <div class="form-title">
+      <h1>📋 Student Feedback</h1>
+      <p>Registration Form — Please fill in all details accurately</p>
+    </div>
+
+    <form id="feedbackForm" novalidate>
+
+      <!-- Student Name -->
+      <div class="form-group">
+        <label for="studentName">Student Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="studentName"
+          name="studentName"
+          placeholder="Enter your full name"
+          autocomplete="name"
+        />
+        <span class="error-msg" id="nameError"></span>
+      </div>
+
+      <!-- Email ID -->
+      <div class="form-group">
+        <label for="email">Email ID <span class="required">*</span></label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="example@domain.com"
+          autocomplete="email"
+        />
+        <span class="error-msg" id="emailError"></span>
+      </div>
+
+      <!-- Mobile Number -->
+      <div class="form-group">
+        <label for="mobile">Mobile Number <span class="required">*</span></label>
+        <input
+          type="tel"
+          id="mobile"
+          name="mobile"
+          placeholder="10-digit mobile number"
+          maxlength="10"
+          autocomplete="tel"
+        />
+        <span class="error-msg" id="mobileError"></span>
+      </div>
+
+      <!-- Department -->
+      <div class="form-group">
+        <label for="department">Department <span class="required">*</span></label>
+        <select id="department" name="department">
+          <option value="">-- Select Department --</option>
+          <option value="cs">Computer Science</option>
+          <option value="it">Information Technology</option>
+          <option value="ec">Electronics &amp; Communication</option>
+          <option value="me">Mechanical Engineering</option>
+          <option value="ce">Civil Engineering</option>
+          <option value="mb">Management &amp; Business</option>
+        </select>
+        <span class="error-msg" id="deptError"></span>
+      </div>
+
+      <!-- Gender -->
+      <div class="form-group">
+        <label>Gender <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="gender" value="male" id="genderMale" />
+            <span>Male</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="female" id="genderFemale" />
+            <span>Female</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="other" id="genderOther" />
+            <span>Other</span>
+          </label>
+        </div>
+        <span class="error-msg" id="genderError"></span>
+      </div>
+
+      <!-- Feedback Comments -->
+      <div class="form-group">
+        <label for="feedback">Feedback Comments <span class="required">*</span></label>
+        <textarea
+          id="feedback"
+          name="feedback"
+          rows="5"
+          placeholder="Share your feedback in at least 10 words..."
+        ></textarea>
+        <span class="word-count" id="wordCount">0 words</span>
+        <span class="error-msg" id="feedbackError"></span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button type="submit" class="btn btn-submit" id="submitBtn">✔ Submit</button>
+        <button type="reset" class="btn btn-reset" id="resetBtn">↺ Reset</button>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- JavaScript Validation (ES Module — required for Firebase SDK imports) -->
+  <script type="module" src="validation.js"></script>
+</body>
+</html>
