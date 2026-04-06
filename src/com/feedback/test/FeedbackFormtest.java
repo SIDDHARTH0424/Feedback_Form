@@ -24,7 +24,7 @@ import java.time.Duration;
  * 2. Maven → Update Project (Alt+F5)
  * 3. Right-click test class → Run As → TestNG Test
  */
-public class FeedbackFormtest {
+public class FeedbackFormTest {
 
     private WebDriver driver;
     private WebDriverWait wait;
