@@ -14,22 +14,22 @@ import org.testng.annotations.Test;
 public class FeedbackFormTest {
 
     WebDriver driver;
+@BeforeClass
+public void setUp() {
 
-    @BeforeClass
-    public void setUp() {
+    WebDriverManager.chromedriver().setup();
 
-        WebDriverManager.chromedriver().setup();
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--headless=new");
+    options.addArguments("--no-sandbox");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--disable-gpu");
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--start-maximized");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
+    driver = new ChromeDriver(options);
 
-        driver = new ChromeDriver(options);
-
-        driver.get("file:///C:/feedback-form/index.html"); 
-    }
+    String path = System.getProperty("user.dir") + "/CA2_devops/index.html";
+    driver.get("file:///" + path);
+}
 
     @Test
     public void testPageTitle() {
