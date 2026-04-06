@@ -4,16 +4,16 @@
 
     <test name="Student Feedback Form Tests" preserve-order="true">
         <classes>
-            <class name="com.feedback.test.FeedbackFormtest">
+            <class name="com.feedback.test.FeedbackFormTest">
                 <methods>
-                    <include name="testPageTitle" />
-                    <include name="testEmptyFormSubmission" />
-                    <include name="testInvalidEmail" />
-                    <include name="testInvalidMobileNumber" />
-                    <include name="testMissingDepartment" />
-                    <include name="testShortFeedback" />
-                    <include name="testValidFormSubmission" />
-                    <include name="testResetButton" />
+                    <include name="testPageTitle"/>
+                    <include name="testEmptyFormSubmission"/>
+                    <include name="testInvalidEmail"/>
+                    <include name="testInvalidMobileNumber"/>
+                    <include name="testMissingDepartment"/>
+                    <include name="testShortFeedback"/>
+                    <include name="testValidFormSubmission"/>
+                    <include name="testResetButton"/>
                 </methods>
             </class>
         </classes>
